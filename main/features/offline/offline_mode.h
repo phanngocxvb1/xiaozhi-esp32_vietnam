@@ -1,3 +1,5 @@
+#include "sdkconfig.h"
+
 #ifndef OFFLINE_MODE_H
 #define OFFLINE_MODE_H
 
