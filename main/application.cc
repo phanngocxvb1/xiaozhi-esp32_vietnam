@@ -22,6 +22,9 @@
 #include "features/spectrum/spectrum_manager.h"
 #include "features/video/video_player.h"
 #include "features/mp4/mp4_player.h"
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+#include "features/offline/offline_mode.h"
+#endif
 #include "features/QRCode/qrcode_display.h"
 #include <esp_lvgl_port.h>
 #include <cmath>
@@ -266,6 +269,11 @@ void Application::DismissAlert() {
 }
 
 void Application::ToggleChatState() {
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+    if (OfflineMode::GetInstance().IsActive()) {
+        return;
+    }
+#endif
     if (device_state_ == kDeviceStateActivating) {
         SetDeviceState(kDeviceStateIdle);
         return;
@@ -309,6 +317,11 @@ void Application::ToggleChatState() {
 }
 
 void Application::StartListening() {
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+    if (OfflineMode::GetInstance().IsActive()) {
+        return;
+    }
+#endif
     if (device_state_ == kDeviceStateActivating) {
         SetDeviceState(kDeviceStateIdle);
         return;
@@ -416,6 +429,14 @@ void Application::Start() {
     /* Start the clock timer to update the status bar */
     esp_timer_start_periodic(clock_timer_handle_, 1000000);
 
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+    // Vol+ held at power-up: skip WiFi/AI and start the offline player directly.
+    if (OfflineMode::GetInstance().BootRequested()) {
+        OfflineMode::GetInstance().StartStandalone();
+        return;
+    }
+#endif
+
     /* Wait for the network to be ready */
     board.StartNetwork();
 
@@ -438,9 +459,18 @@ void Application::Start() {
 #ifdef CONFIG_SD_CARD_ENABLE
     auto sd_card = board.GetSdCard();
     if (sd_card != nullptr) {
-        if (sd_card->Initialize() == ESP_OK) {
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+        bool sd_ok = OfflineMode::GetInstance().SdMounted();
+        if (!sd_ok && sd_card->Initialize() == ESP_OK) {
+            OfflineMode::GetInstance().SetSdMounted(true);
+            sd_ok = true;
+        }
+#else
+        bool sd_ok = (sd_card->Initialize() == ESP_OK);
+#endif
+        if (sd_ok) {
             ESP_LOGI(TAG, "SD card mounted successfully");
-            InitSdMusic();
+            if (!sd_music_) InitSdMusic();
 
 #if (0) // Test video playback avi video from SD card
             InitVideo();
@@ -707,6 +737,11 @@ void Application::MainEventLoop() {
 }
 
 void Application::OnWakeWordDetected() {
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+    if (OfflineMode::GetInstance().IsActive()) {
+        return;
+    }
+#endif
     if (!protocol_) {
         return;
     }
@@ -900,6 +935,11 @@ bool Application::UpgradeFirmware(Ota& ota, const std::string& url) {
 }
 
 void Application::WakeWordInvoke(const std::string& wake_word) {
+#ifdef CONFIG_OFFLINE_MODE_ENABLE
+    if (OfflineMode::GetInstance().IsActive()) {
+        return;
+    }
+#endif
     if (!protocol_) {
         return;
     }

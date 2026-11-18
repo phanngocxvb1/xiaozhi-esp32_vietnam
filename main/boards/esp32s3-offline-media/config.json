@@ -1,0 +1,16 @@
+{
+    "target": "esp32s3",
+    "builds": [
+        {
+            "name": "esp32s3-offline-media",
+            "sdkconfig_append": [
+                "CONFIG_SD_CARD_ENABLE=y",
+                "CONFIG_SD_CARD_SPI_INTERFACE=y",
+                "CONFIG_OFFLINE_MODE_ENABLE=y",
+                "CONFIG_FATFS_LFN_HEAP=y",
+                "CONFIG_FATFS_API_ENCODING_UTF_8=y",
+                "CONFIG_FATFS_FS_LOCK=5"
+            ]
+        }
+    ]
+}
