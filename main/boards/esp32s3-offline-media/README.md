@@ -8,7 +8,7 @@
 | INMP441 WS / SCK / SD | 4 / 5 / 6 |
 | MAX98357A DIN / BCLK / LRC | 7 / 15 / 16 |
 | SD MISO / MOSI / CLK | 12 / 13 / 14 |
-| SD CS | **21 (giả định – sửa trong `config.h`)** |
+| SD CS | 10 |
 | Touch | 47 |
 | Vol+ / Vol- | 39 / 40 |
 

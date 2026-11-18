@@ -36,7 +36,7 @@
 #define DISPLAY_BACKLIGHT_OUTPUT_INVERT false
 
 #define DISPLAY_WIDTH         240
-#define DISPLAY_HEIGHT        320
+#define DISPLAY_HEIGHT        240
 #define DISPLAY_MIRROR_X      false
 #define DISPLAY_MIRROR_Y      false
 #define DISPLAY_SWAP_XY       false
@@ -47,11 +47,10 @@
 #define DISPLAY_SPI_MODE      0
 
 // ---------------- SD card (SPI) ----------------
-// NOTE: the CS pin was not in the pin list. GPIO21 is a placeholder - change it
-// to the pin your SD module's CS is really wired to.
+// SD module CS is wired to GPIO10.
 #define CARD_SPI_MISO_GPIO GPIO_NUM_12
 #define CARD_SPI_MOSI_GPIO GPIO_NUM_13
 #define CARD_SPI_SCLK_GPIO GPIO_NUM_14
-#define CARD_SPI_CS_GPIO   GPIO_NUM_21
+#define CARD_SPI_CS_GPIO   GPIO_NUM_10
 
 #endif // _BOARD_CONFIG_H_
