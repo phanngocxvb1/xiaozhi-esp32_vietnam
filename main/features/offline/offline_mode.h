@@ -60,7 +60,7 @@ public:
 
 private:
     enum class Cmd : uint8_t {
-        Toggle, PlayPause, SwitchSource, CycleVolume, Next, Prev,
+        Toggle, EnterOnly, PlayPause, SwitchSource, CycleVolume, Next, Prev,
         AutoNext,      // end of track / video / slideshow tick
     };
 

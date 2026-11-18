@@ -110,6 +110,10 @@ void OfflineMode::Handle(Cmd cmd) {
         if (active_) Exit(); else Enter();
         return;
     }
+    if (cmd == Cmd::EnterOnly) {   // boot request: never leaves offline mode if already in it
+        if (!active_) Enter();
+        return;
+    }
     if (!active_) return;
 
     switch (cmd) {
@@ -200,7 +204,7 @@ void OfflineMode::StartStandalone() {
     standalone_ = true;
     standalone_start_us_ = esp_timer_get_time();
     ESP_LOGI(TAG, "Boot request: starting offline mode without network");
-    Post(Cmd::Toggle);
+    Post(Cmd::EnterOnly);
 }
 
 void OfflineMode::Enter() {
@@ -429,8 +433,9 @@ bool OfflineMode::DecodeJpegToCanvas(const std::string& path) {
             ESP_LOGW(TAG, "JPEG header parse failed (progressive JPEG is not supported)");
             break;
         }
-        int out_len = 0;
-        if (jpeg_dec_get_outbuf_len(dec, &out_len) != JPEG_ERR_OK || out_len <= 0 || out_len > kMaxDecodedBytes) {
+        // RGB565 output buffer: dimensions padded to the 16x16 MCU grid.
+        const int out_len = ((hdr->width + 15) & ~15) * ((hdr->height + 15) & ~15) * 2;
+        if (hdr->width <= 0 || hdr->height <= 0 || out_len > kMaxDecodedBytes) {
             ESP_LOGW(TAG, "Photo %dx%d too large to decode (%d bytes) - resize it", hdr->width, hdr->height, out_len);
             break;
         }
